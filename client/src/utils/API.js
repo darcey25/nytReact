@@ -1,32 +1,40 @@
-import axios from "axios";
+// All requests go to this app's own Express server. Article search is
+// proxied through /api/search so the NYT API key stays on the server.
+async function request(url, options) {
+  const response = await fetch(url, options);
+  if (!response.ok) {
+    throw new Error(`${options?.method || "GET"} ${url} failed (${response.status})`);
+  }
+  return response.json();
+}
 
-const BASEURL  = "https://api.nytimes.com/svc/search/v2/articlesearch.json?api-key=";
-const APIKEY   = "b9f91d369ff59547cd47b931d8cbc56b:0:74623931";
-const queryFix = "&q=";
+const json = (method, body) => ({
+  method,
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body),
+});
 
 const API = {
   // Retrieves all articles from the db
   getArticles: function() {
-    return axios.get(process.env.REACT_APP_API_HOST + "/api/articles");
+    return request("/api/articles");
   },
   // Saves a new article to the db
   saveArticle: function(article) {
-    return axios.post(process.env.REACT_APP_API_HOST + "/api/articles", { article });
+    return request("/api/articles", json("POST", { article }));
   },
   // Deletes an article from the db
   deleteArticle: function(id) {
-    console.log('in API delete article ')
-    return axios.delete(process.env.REACT_APP_API_HOST + `/api/articles/${id}`);
+    return request(`/api/articles/${encodeURIComponent(id)}`, { method: "DELETE" });
   },
   // Toggles an article's favorite property in the db
   favoriteArticle: function(article) {
     article.favorited = !article.favorited;
     const { _id, favorited } = article;
-    return axios.patch(process.env.REACT_APP_API_HOST + `/api/articles/${_id}`, { favorited });
+    return request(`/api/articles/${encodeURIComponent(_id)}`, json("PATCH", { favorited }));
   },
   search: function(query) {
-  	console.log('full query: '+ BASEURL + APIKEY + queryFix + query);
-    return axios.get(BASEURL + APIKEY + queryFix + query);
+    return request(`/api/search?q=${encodeURIComponent(query)}`);
   }
 };
 
