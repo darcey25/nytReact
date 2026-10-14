@@ -6,18 +6,20 @@
   "scripts": {
     "server": "node server.js",
     "client": "node scripts/start-client.js",
-    "start": "concurrently \"nodemon server.js\" \"npm run client\"",
+    "start": "concurrently \"node --watch server.js\" \"npm run client\"",
     "build": "node scripts/build.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "cd client && npm install"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "concurrently": "^3.5.0",
-    "nodemon": "^1.11.0"
+    "concurrently": "^9.2.1"
   },
   "dependencies": {
-    "express": "^4.15.4",
-    "react-router-dom": "^4.2.2"
+    "express": "^5.2.1"
+  },
+  "engines": {
+    "node": ">=20.19"
   }
 }
